@@ -1,8 +1,46 @@
 blueprint:
-  name: Zigbee2MQTT 2.0 - Tuya 4-Button Scene Switch
-  description: Automate your Tuya 4-Button Scene Switch via Zigbee2MQTT.
+  name: Zigbee2MQTT 2.0 - Tuya 4-Button Scene Switch (with button selection)
+  description: |
+    Automate your Tuya 4-Button Scene Switch via Zigbee2MQTT.
+    Original version: https://community.home-assistant.io/t/zigbee2mqtt-tuya-4-button-scene-switch-ts0044/274735/164
+    This version: https://github.com/ShadowBelmolve/home-assistant-blueprints/blob/main/automations/TS0044-Tuya-Switch/ts0044_tuya_switch.yaml
   domain: automation
+  author: "Panoplian, ShadowBelmolve"
   input:
+    upper_left_button_number:
+      name: Upper-Left button action
+      description: Action of the Upper-Left button.
+      default: "1"
+      selector: &buttonSelector
+        select:
+          mode: dropdown
+          options:
+            - label: Action 1
+              value: "1"
+            - label: Action 2
+              value: "2"
+            - label: Action 3
+              value: "3"
+            - label: Action 4
+              value: "4"
+    upper_right_button_number:
+      name: Upper-Right button action
+      description: Action of the Upper-Right button.
+      default: "2"
+      selector: *buttonSelector
+
+    bottom_left_button_number:
+      name: Bottom-Left button action
+      description: Action of the Bottom-Left button.
+      default: "3"
+      selector: *buttonSelector
+
+    bottom_right_button_number:
+      name: Bottom-Right button action
+      description: Action of the Bottom-Right button.
+      default: "4"
+      selector: *buttonSelector
+
     switch:
       name: Tuya 4-Button Scene Switch
       description: Select the Tuya 4-Button Scene Switch to use
@@ -11,81 +49,81 @@ blueprint:
           integration: mqtt
 
     # Button 1 Actions
-    button_one_short_press:
-      name: Single Press - Button 1 (Lower-Left)
-      description: Action to run on button 1 single press
+    button_upper_left_short_press:
+      name: Single Press - Upper-Left
+      description: Action to run on upper-left button single press
       default: []
       selector:
         action: {}
-    button_one_double_press:
-      name: Double Press - Button 1 (Lower-Left)
-      description: Action to run on button 1 double press
+    button_upper_left_double_press:
+      name: Double Press - Upper-Left
+      description: Action to run on upper-left button double press
       default: []
       selector:
         action: {}
-    button_one_long_press:
-      name: Long Press - Button 1 (Lower-Left)
-      description: Action to run on button 1 long press
+    button_upper_left_long_press:
+      name: Long Press - Upper-Left
+      description: Action to run on upper-left button long press
       default: []
       selector:
         action: {}
 
     # Button 2 Actions
-    button_two_short_press:
-      name: Single Press - Button 2 (Lower-Right)
-      description: Action to run on button 2 single press
+    button_upper_right_short_press:
+      name: Single Press - Upper-Right
+      description: Action to run on upper-right button single press
       default: []
       selector:
         action: {}
-    button_two_double_press:
-      name: Double Press - Button 2 (Lower-Right)
-      description: Action to run on button 2 double press
+    button_upper_right_double_press:
+      name: Double Press - Upper-Right
+      description: Action to run on upper-right button double press
       default: []
       selector:
         action: {}
-    button_two_long_press:
-      name: Long Press - Button 2 (Lower-Right)
-      description: Action to run on button 2 long press
+    button_upper_right_long_press:
+      name: Long Press - Upper-Right
+      description: Action to run on upper-right button long press
       default: []
       selector:
         action: {}
 
     # Button 3 Actions
-    button_three_short_press:
-      name: Single Press - Button 3 (Upper-Right)
-      description: Action to run on button 3 single press
+    button_bottom_left_short_press:
+      name: Single Press - Bottom-Left
+      description: Action to run on bottom-left button single press
       default: []
       selector:
         action: {}
-    button_three_double_press:
-      name: Double Press - Button 3 (Upper-Right)
-      description: Action to run on button 3 double press
+    button_bottom_left_double_press:
+      name: Double Press - Bottom-Left
+      description: Action to run on bottom-left button double press
       default: []
       selector:
         action: {}
-    button_three_long_press:
-      name: Long Press - Button 3 (Upper-Right)
-      description: Action to run on button 3 long press
+    button_bottom_left_long_press:
+      name: Long Press - Bottom-Left
+      description: Action to run on bottom-left button long press
       default: []
       selector:
         action: {}
 
     # Button 4 Actions
-    button_four_short_press:
-      name: Single Press - Button 4 (Upper-Left)
-      description: Action to run on button 4 single press
+    button_bottom_right_short_press:
+      name: Single Press - Bottom-Right
+      description: Action to run on bottom-right button single press
       default: []
       selector:
         action: {}
-    button_four_double_press:
-      name: Double Press - Button 4 (Upper-Left)
-      description: Action to run on button 4 double press
+    button_bottom_right_double_press:
+      name: Double Press - Bottom-Right
+      description: Action to run on bottom-right button double press
       default: []
       selector:
         action: {}
-    button_four_long_press:
-      name: Long Press - Button 4 (Upper-Left)
-      description: Action to run on button 4 long press
+    button_bottom_right_long_press:
+      name: Long Press - Bottom-Right
+      description: Action to run on bottom-right button long press
       default: []
       selector:
         action: {}
@@ -161,44 +199,57 @@ trigger:
 
 action:
   - variables:
-      command: '{{ trigger.payload }}'
+      upper_left_button_number: !input upper_left_button_number
+      upper_right_button_number: !input upper_right_button_number
+      bottom_left_button_number: !input bottom_left_button_number
+      bottom_right_button_number: !input bottom_right_button_number
+      command: |
+        {{
+          trigger.payload
+            | regex_replace(find=upper_left_button_number, replace='upper_left')
+            | regex_replace(find=upper_right_button_number, replace='upper_right')
+            | regex_replace(find=bottom_left_button_number, replace='bottom_left')
+            | regex_replace(find=bottom_right_button_number, replace='bottom_right')
+        }}
+
   - choose:
-    - conditions:
-      - '{{ command == ''1_single'' }}'
-      sequence: !input button_one_short_press
-    - conditions:
-      - '{{ command == ''2_single'' }}'
-      sequence: !input button_two_short_press
-    - conditions:
-      - '{{ command == ''3_single'' }}'
-      sequence: !input button_three_short_press
-    - conditions:
-      - '{{ command == ''4_single'' }}'
-      sequence: !input button_four_short_press
-    - conditions:
-      - '{{ command == ''1_double'' }}'
-      sequence: !input button_one_double_press
-    - conditions:
-      - '{{ command == ''2_double'' }}'
-      sequence: !input button_two_double_press
-    - conditions:
-      - '{{ command == ''3_double'' }}'
-      sequence: !input button_three_double_press
-    - conditions:
-      - '{{ command == ''4_double'' }}'
-      sequence: !input button_four_double_press
-    - conditions:
-      - '{{ command == ''1_hold'' }}'
-      sequence: !input button_one_long_press
-    - conditions:
-      - '{{ command == ''2_hold'' }}'
-      sequence: !input button_two_long_press
-    - conditions:
-      - '{{ command == ''3_hold'' }}'
-      sequence: !input button_three_long_press
-    - conditions:
-      - '{{ command == ''4_hold'' }}'
-      sequence: !input button_four_long_press
+      - conditions:
+          - "{{ command == 'upper_left_single' }}"
+        sequence: !input button_upper_left_short_press
+      - conditions:
+          - "{{ command == 'upper_right_single' }}"
+        sequence: !input button_upper_right_short_press
+      - conditions:
+          - "{{ command == 'bottom_left_single' }}"
+        sequence: !input button_bottom_left_short_press
+      - conditions:
+          - "{{ command == 'bottom_right_single' }}"
+        sequence: !input button_bottom_right_short_press
+      - conditions:
+          - "{{ command == 'upper_left_double' }}"
+        sequence: !input button_upper_left_double_press
+      - conditions:
+          - "{{ command == 'upper_right_double' }}"
+        sequence: !input button_upper_right_double_press
+      - conditions:
+          - "{{ command == 'bottom_left_double' }}"
+        sequence: !input button_bottom_left_double_press
+      - conditions:
+          - "{{ command == 'bottom_right_double' }}"
+        sequence: !input button_bottom_right_double_press
+      - conditions:
+          - "{{ command == 'upper_left_hold' }}"
+        sequence: !input button_upper_left_long_press
+      - conditions:
+          - "{{ command == 'upper_right_hold' }}"
+        sequence: !input button_upper_right_long_press
+      - conditions:
+          - "{{ command == 'bottom_left_hold' }}"
+        sequence: !input button_bottom_left_long_press
+      - conditions:
+          - "{{ command == 'bottom_right_hold' }}"
+        sequence: !input button_bottom_right_long_press
 
 mode: single
 max_exceeded: silent
+
