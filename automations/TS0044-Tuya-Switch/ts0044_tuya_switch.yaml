@@ -250,6 +250,7 @@ action:
           - "{{ command == 'bottom_right_hold' }}"
         sequence: !input button_bottom_right_long_press
 
-mode: single
-max_exceeded: silent
+mode: parallel
+max: 5
+max_exceeded: warning
 
